@@ -18,9 +18,9 @@ type Result struct {
 
 func UserGetAll(w http.ResponseWriter, r *http.Request) {
 	users := []models.User{}
-	mysql.DB.Find(&users)
-	res := Result{Code: http.StatusOK, Data: users, Message: "Success get user"}
+	mysql.DB.Preload("Products").Preload("Profile").Find(&users)
 
+	res := Result{Code: http.StatusOK, Data: users, Message: "Success get user"}
 	results, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -57,7 +57,7 @@ func UserGetById(w http.ResponseWriter, r *http.Request) {
 	userId := params["id"]
 	var user models.User
 
-	err := mysql.DB.First(&user, userId).Error
+	err := mysql.DB.Preload("Products").First(&user, userId).Error
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

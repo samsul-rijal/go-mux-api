@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/gorilla/mux"
 )
 
 func ProductCreate(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +45,9 @@ func ProductCreate(w http.ResponseWriter, r *http.Request) {
 
 func ProductGetAll(w http.ResponseWriter, r *http.Request) {
 	products := []models.Product{}
-	mysql.DB.Find(&products)
-	res := Result{Code: http.StatusOK, Data: products, Message: "Success get user"}
+	mysql.DB.Preload("User").Find(&products)
 
+	res := Result{Code: http.StatusOK, Data: products, Message: "Success get user"}
 	results, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,5 +56,25 @@ func ProductGetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(results)
+
+}
+
+func ProductGetById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	productId := params["id"]
+	var product models.Product
+
+	err := mysql.DB.Preload("User").First(&product, productId).Error
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := Result{Code: http.StatusBadRequest, Message: "product not found"}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	response := Result{Code: http.StatusOK, Message: "success", Data: map[string]interface{}{"product": product}}
+	json.NewEncoder(w).Encode(response)
 
 }

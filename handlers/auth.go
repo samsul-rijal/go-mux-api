@@ -21,12 +21,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	json.Unmarshal(payloads, &user)
 
-	newUser := models.User{
-		Name:     user.Name,
-		Email:    user.Email,
-		Password: user.Password,
-	}
-
 	hashedPassword, err := password.HashingPassword(user.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -34,10 +28,26 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
-	newUser.Password = hashedPassword
-	errCreateUser := mysql.DB.Create(&newUser).Error
+	newUser := models.User{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: hashedPassword,
+	}
 
+	errCreateUser := mysql.DB.Create(&newUser).Error
 	if errCreateUser != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
+		json.NewEncoder(w).Encode(response)
+	}
+
+	// create profile user
+	newProfile := models.Profile{
+		UserID: newUser.ID,
+	}
+	errCreateProfile := mysql.DB.Create(&newProfile).Error
+
+	if errCreateProfile != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
 		json.NewEncoder(w).Encode(response)
@@ -61,20 +71,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check email
-	err := mysql.DB.Debug().First(&user, "email = ?", newUser.Email).Error
+	err := mysql.DB.First(&user, "email = ?", newUser.Email).Error
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
+		w.WriteHeader(http.StatusBadRequest)
+		response := Result{Code: http.StatusBadRequest, Message: "wrong email or password"}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	// Check password
 	isValid := password.CheckPasswordHash(newUser.Password, user.Password)
 	if !isValid {
-		w.WriteHeader(http.StatusInternalServerError)
-		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
+		w.WriteHeader(http.StatusBadRequest)
+		response := Result{Code: http.StatusBadRequest, Message: "wrong email or password"}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	//generate token
@@ -88,6 +100,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if errGenerateToken != nil {
 		log.Println(errGenerateToken)
 		fmt.Println("Unauthorize")
+		return
 	}
 
 	result := models.User{
