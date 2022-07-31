@@ -32,10 +32,20 @@ func ProductCreate(w http.ResponseWriter, r *http.Request) {
 
 	errCreateProduct := mysql.DB.Debug().Create(&newProduct).Error
 
+	// create data many2many
+	for _, categoryId := range product.CategoryID {
+		productCategory := models.ProductCategory{
+			ProductID:  newProduct.ID,
+			CategoryID: categoryId,
+		}
+		mysql.DB.Debug().Create(&productCategory)
+	}
+
 	if errCreateProduct != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": errCreateProduct.Error()}}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -44,8 +54,8 @@ func ProductCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProductGetAll(w http.ResponseWriter, r *http.Request) {
-	products := []models.Product{}
-	mysql.DB.Preload("User").Find(&products)
+	products := []models.ProductResponseWithCategory{}
+	mysql.DB.Preload("User").Preload("Category").Find(&products)
 
 	res := Result{Code: http.StatusOK, Data: products, Message: "Success get user"}
 	results, err := json.Marshal(res)
