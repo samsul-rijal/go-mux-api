@@ -6,11 +6,18 @@ type User struct {
 	ID        int               `json:"id"`
 	Name      string            `gorm:"type: varchar(255)" json:"name"`
 	Email     string            `gorm:"type: varchar(255)" json:"email"`
-	Password  string            `gorm:"type: varchar(255)" json:"password"`
+	Password  string            `gorm:"type: varchar(255)" json:"-"`
 	Profile   ProfileResponse   `json:"profile"`
 	Products  []ProductResponse `json:"products"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
+}
+
+type AuthRequest struct {
+	ID       int    `json:"id"`
+	Name     string `gorm:"type: varchar(255)" json:"name"`
+	Email    string `gorm:"type: varchar(255)" json:"email"`
+	Password string `gorm:"type: varchar(255)" json:"password"`
 }
 
 type UserResponse struct {
@@ -30,5 +37,8 @@ func (UserResponse) TableName() string {
 	return "users"
 }
 func (UserResponseWithProduct) TableName() string {
+	return "users"
+}
+func (AuthRequest) TableName() string {
 	return "users"
 }

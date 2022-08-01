@@ -14,7 +14,7 @@ func TransactionGetAll(w http.ResponseWriter, r *http.Request) {
 	products := []models.Transaction{}
 	mysql.DB.Preload("Product").Preload("Buyer").Preload("Seller").Find(&products)
 
-	res := Result{Code: http.StatusOK, Data: products, Message: "Success get product"}
+	res := Result{Code: http.StatusOK, Data: products, Message: "Success get transaction"}
 	results, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,12 +44,13 @@ func TransactionCreate(w http.ResponseWriter, r *http.Request) {
 		Status:    "pending",
 	}
 
-	errCreateProduct := mysql.DB.Debug().Create(&newTransaction).Error
+	errCreateProduct := mysql.DB.Create(&newTransaction).Error
 
 	if errCreateProduct != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := Result{Code: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": errCreateProduct.Error()}}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

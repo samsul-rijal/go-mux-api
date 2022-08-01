@@ -18,7 +18,7 @@ import (
 func Register(w http.ResponseWriter, r *http.Request) {
 	payloads, _ := ioutil.ReadAll(r.Body)
 
-	var user models.User
+	var user models.AuthRequest
 	json.Unmarshal(payloads, &user)
 
 	hashedPassword, err := password.HashingPassword(user.Password)
@@ -62,7 +62,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	payloads, _ := ioutil.ReadAll(r.Body)
 
-	var user models.User
+	var user models.AuthRequest
 	json.Unmarshal(payloads, &user)
 
 	newUser := models.User{
