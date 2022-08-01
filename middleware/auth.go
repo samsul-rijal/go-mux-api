@@ -35,8 +35,8 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(context.Background(), "userInfo", claims)
+		ctx := context.WithValue(r.Context(), "userInfo", claims)
 		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

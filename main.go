@@ -21,6 +21,9 @@ func main() {
 	r := mux.NewRouter()
 	routes.RouteInit(r.PathPrefix("/api/v1").Subrouter())
 
+	//path file
+	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+
 	fmt.Println("server running localhost:8000")
 	log.Fatal(http.ListenAndServe("localhost:8000", r))
 }

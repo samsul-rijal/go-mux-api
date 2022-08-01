@@ -20,15 +20,16 @@ func UserGetAll(w http.ResponseWriter, r *http.Request) {
 	users := []models.User{}
 	mysql.DB.Preload("Products").Preload("Profile").Find(&users)
 
-	res := Result{Code: http.StatusOK, Data: users, Message: "Success get user"}
-	results, err := json.Marshal(res)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	// res := Result{Code: http.StatusOK, Data: users, Message: "Success get user"}
+	// results, err := json.Marshal(res)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(results)
+	// w.Write(results)
+	json.NewEncoder(w).Encode(users)
 
 }
 

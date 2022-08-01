@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"go-mux-api/models"
 	"go-mux-api/pkg/mysql"
-	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -12,10 +12,14 @@ import (
 )
 
 func ProductCreate(w http.ResponseWriter, r *http.Request) {
-	payloads, _ := ioutil.ReadAll(r.Body)
+	// payloads, _ := ioutil.ReadAll(r.Body)
 
 	var product models.Product
-	json.Unmarshal(payloads, &product)
+	// json.Unmarshal(payloads, &product)
+
+	// get data filename middleware
+	dataContex := r.Context().Value("dataFile")
+	filename := dataContex.(string)
 
 	// get data user token
 	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
@@ -25,12 +29,12 @@ func ProductCreate(w http.ResponseWriter, r *http.Request) {
 		Name:   product.Name,
 		Desc:   product.Desc,
 		Price:  product.Price,
-		Image:  product.Image,
+		Image:  filename,
 		Qty:    product.Qty,
 		UserID: userId,
 	}
 
-	errCreateProduct := mysql.DB.Debug().Create(&newProduct).Error
+	errCreateProduct := mysql.DB.Create(&newProduct).Error
 
 	// create data many2many
 	for _, categoryId := range product.CategoryID {
@@ -56,6 +60,8 @@ func ProductCreate(w http.ResponseWriter, r *http.Request) {
 func ProductGetAll(w http.ResponseWriter, r *http.Request) {
 	products := []models.ProductResponseWithCategory{}
 	mysql.DB.Preload("User").Preload("Category").Find(&products)
+
+	log.Println(products)
 
 	res := Result{Code: http.StatusOK, Data: products, Message: "Success get user"}
 	results, err := json.Marshal(res)

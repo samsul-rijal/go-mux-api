@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"fmt"
+	"encoding/json"
 	"go-mux-api/handlers"
 	"go-mux-api/middleware"
 	"net/http"
@@ -10,7 +10,9 @@ import (
 )
 
 func Hello(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(w, "Hello world!")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Hello World")
 }
 
 func RouteInit(r *mux.Router) {
@@ -24,7 +26,8 @@ func RouteInit(r *mux.Router) {
 
 	r.HandleFunc("/profile", middleware.Auth(handlers.ProfileGet)).Methods("GET")
 
-	r.HandleFunc("/product", middleware.Auth(handlers.ProductCreate)).Methods("POST")
+	// r.HandleFunc("/product", middleware.Auth(handlers.ProductCreate)).Methods("POST")
+	r.HandleFunc("/product", middleware.Auth(middleware.UploadFile(handlers.ProductCreate))).Methods("POST")
 	r.HandleFunc("/products", middleware.Auth(handlers.ProductGetAll)).Methods("GET")
 	r.HandleFunc("/product/{id}", middleware.Auth(handlers.ProductGetById)).Methods("GET")
 
@@ -34,6 +37,6 @@ func RouteInit(r *mux.Router) {
 	r.HandleFunc("/transactions", middleware.Auth(handlers.TransactionGetAll)).Methods("GET")
 	r.HandleFunc("/transaction", middleware.Auth(handlers.TransactionCreate)).Methods("POST")
 
-	// r.HandleFunc("/upload", middleware.UploadFile(handlers.ProductCreate)).Methods("POST")
-	// r.HandleFunc("/upload", middleware.Upload).Methods("POST")
+	// r.HandleFunc("/upload", middleware.Auth(middleware.UploadFile(handlers.ProductCreate))).Methods("POST")
+	r.HandleFunc("/hello", Hello).Methods("GET")
 }
