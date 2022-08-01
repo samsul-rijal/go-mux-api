@@ -52,7 +52,7 @@ func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 
 		ctx := context.WithValue(context.Background(), "dataFile", tempFile.Name())
 		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
+		// next.ServeHTTP(w, r)
 	})
 }
 
@@ -78,7 +78,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
-	tempFile, err := ioutil.TempFile("temp-images", "upload-*.png")
+	tempFile, err := ioutil.TempFile("uploads", "upload-*.png")
 	if err != nil {
 		fmt.Println(err)
 	}

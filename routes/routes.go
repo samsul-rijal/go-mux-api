@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"go-mux-api/handlers"
 	"go-mux-api/middleware"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func RouteInit() {
-	r := mux.NewRouter()
+func Hello(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(w, "Hello world!")
+}
+
+func RouteInit(r *mux.Router) {
 
 	r.HandleFunc("/register", handlers.Register).Methods("POST")
 	r.HandleFunc("/login", handlers.Login).Methods("POST")
@@ -34,7 +36,4 @@ func RouteInit() {
 
 	// r.HandleFunc("/upload", middleware.UploadFile(handlers.ProductCreate)).Methods("POST")
 	// r.HandleFunc("/upload", middleware.Upload).Methods("POST")
-
-	fmt.Println("server running localhost:8000")
-	log.Fatal(http.ListenAndServe("localhost:8000", r))
 }

@@ -17,7 +17,7 @@ type Result struct {
 }
 
 func UserGetAll(w http.ResponseWriter, r *http.Request) {
-	users := []models.User{}
+	users := []models.UserResponseWithProduct{}
 	mysql.DB.Preload("Products").Preload("Profile").Find(&users)
 
 	res := Result{Code: http.StatusOK, Data: users, Message: "Success get user"}
