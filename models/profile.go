@@ -7,8 +7,8 @@ type Profile struct {
 	Phone     string       `json:"phone" gorm:"type: varchar(255)"`
 	Gender    string       `json:"gender" gorm:"type: varchar(255)"`
 	Address   string       `json:"address" gorm:"type: text"`
-	UserID    int          `json:"user_id"`
-	User      UserResponse `json:"user"`
+	UserID    int          `json:"user_id" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	User      UserResponse `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
 }

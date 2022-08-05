@@ -11,10 +11,6 @@ import (
 func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Upload file
-		w.Header().Set("Content-Type", "application/json")
-		// Parse our multipart form, 10 << 20 specifies a maximum
-		// upload of 10 MB files.
-		r.ParseMultipartForm(10 << 20)
 		// FormFile returns the first file for the given key `myFile`
 		// it also returns the FileHeader so we can get the Filename,
 		// the Header and the size of the file
@@ -29,6 +25,16 @@ func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 		// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 		// fmt.Printf("File Size: %+v\n", handler.Size)
 		// fmt.Printf("MIME Header: %+v\n", handler.Header)
+		const MAX_UPLOAD_SIZE = 10 << 20 // 10MB
+		// Parse our multipart form, 10 << 20 specifies a maximum
+		// upload of 10 MB files.
+		r.ParseMultipartForm(MAX_UPLOAD_SIZE)
+		if r.ContentLength > MAX_UPLOAD_SIZE {
+			w.WriteHeader(http.StatusBadRequest)
+			response := Result{Code: http.StatusBadRequest, Message: "Max size in 1mb"}
+			json.NewEncoder(w).Encode(response)
+			return
+		}
 
 		// Create a temporary file within our temp-images directory that follows
 		// a particular naming pattern

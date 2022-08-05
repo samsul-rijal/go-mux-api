@@ -14,6 +14,8 @@ func CategoryCreate(w http.ResponseWriter, r *http.Request) {
 	var category models.Category
 	json.Unmarshal(payloads, &category)
 
+	// log.Println(category)
+
 	errCreateCategory := mysql.DB.Create(&category).Error
 
 	if errCreateCategory != nil {

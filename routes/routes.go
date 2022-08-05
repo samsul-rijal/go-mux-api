@@ -20,9 +20,11 @@ func RouteInit(r *mux.Router) {
 	r.HandleFunc("/register", handlers.Register).Methods("POST")
 	r.HandleFunc("/login", handlers.Login).Methods("POST")
 
-	r.HandleFunc("/users", middleware.Auth(handlers.UserGetAll)).Methods("GET")
+	r.HandleFunc("/users", handlers.UserGetAll).Methods("GET")
 	r.HandleFunc("/user/{id}", handlers.UserGetById).Methods("GET")
 	r.HandleFunc("/user", handlers.UserCreate).Methods("POST")
+	r.HandleFunc("/user/{id}", handlers.UserUpdate).Methods("PUT")
+	r.HandleFunc("/user/{id}", handlers.UserDelete).Methods("DELETE")
 
 	r.HandleFunc("/profile", middleware.Auth(handlers.ProfileGet)).Methods("GET")
 
@@ -30,6 +32,7 @@ func RouteInit(r *mux.Router) {
 	r.HandleFunc("/product", middleware.Auth(middleware.UploadFile(handlers.ProductCreate))).Methods("POST")
 	r.HandleFunc("/products", middleware.Auth(handlers.ProductGetAll)).Methods("GET")
 	r.HandleFunc("/product/{id}", middleware.Auth(handlers.ProductGetById)).Methods("GET")
+	r.HandleFunc("/product/{id}", middleware.Auth(middleware.UploadFile(handlers.UpdateProduct))).Methods("PUT")
 
 	r.HandleFunc("/categories", middleware.Auth(handlers.CategoryGetAll)).Methods("GET")
 	r.HandleFunc("/category", middleware.Auth(handlers.CategoryCreate)).Methods("POST")
@@ -37,6 +40,6 @@ func RouteInit(r *mux.Router) {
 	r.HandleFunc("/transactions", middleware.Auth(handlers.TransactionGetAll)).Methods("GET")
 	r.HandleFunc("/transaction", middleware.Auth(handlers.TransactionCreate)).Methods("POST")
 
-	// r.HandleFunc("/upload", middleware.Auth(middleware.UploadFile(handlers.ProductCreate))).Methods("POST")
+	r.HandleFunc("/upload", middleware.Auth(middleware.UploadFile(handlers.UpdateProduct))).Methods("POST")
 	r.HandleFunc("/hello", Hello).Methods("GET")
 }

@@ -7,8 +7,8 @@ type Product struct {
 	Price      int          `json:"price" form:"price" gorm:"type: int"`
 	Image      string       `json:"image" form:"image" gorm:"type: varchar(255)"`
 	Qty        int          `json:"qty" form:"qty"`
-	UserID     int          `json:"user_id" form:"user_id"`
-	User       UserResponse `json:"user"`
+	UserID     int          `json:"user_id" form:"user_id" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	User       UserResponse `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Category   []Category   `json:"category" gorm:"many2many:product_categories"`
 	CategoryID []int        `json:"category_id" form:"category_id" gorm:"-"`
 }
