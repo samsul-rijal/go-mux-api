@@ -7,8 +7,8 @@ type User struct {
 	Name      string            `gorm:"type: varchar(255)" json:"name"`
 	Email     string            `gorm:"type: varchar(255)" json:"email"`
 	Password  string            `gorm:"type: varchar(255)" json:"-"`
-	Profile   ProfileResponse   `json:"profile" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Products  []ProductResponse `json:"products" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Profile   ProfileResponse   `json:"profile"`
+	Products  []ProductResponse `json:"products"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }

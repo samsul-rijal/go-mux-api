@@ -20,7 +20,7 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 
 		if token == "" {
 			w.WriteHeader(http.StatusUnauthorized)
-			response := Result{Code: http.StatusUnauthorized, Message: "unauthorized"}
+			response := Result{Code: http.StatusUnauthorized, Message: "masukan key token"}
 			json.NewEncoder(w).Encode(response)
 			return
 		}
@@ -29,8 +29,8 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 		claims, err := jwtToken.DecodeToken(token)
 
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			response := Result{Code: http.StatusUnauthorized, Message: "unauthorized"}
+			w.WriteHeader(http.StatusBadRequest)
+			response := Result{Code: http.StatusUnauthorized, Message: "Invalid Token"}
 			json.NewEncoder(w).Encode(response)
 			return
 		}
