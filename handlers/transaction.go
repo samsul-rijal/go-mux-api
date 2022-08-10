@@ -12,7 +12,7 @@ import (
 
 func TransactionGetAll(w http.ResponseWriter, r *http.Request) {
 	products := []models.Transaction{}
-	mysql.DB.Preload("Product").Preload("Buyer").Preload("Seller").Find(&products)
+	mysql.DB.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Find(&products)
 
 	res := Result{Code: http.StatusOK, Data: products, Message: "Success get transaction"}
 	results, err := json.Marshal(res)
