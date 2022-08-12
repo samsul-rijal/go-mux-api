@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-mux-api/models"
 	"go-mux-api/pkg/mysql"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/midtrans/midtrans-go"
+	snap "github.com/midtrans/midtrans-go/snap"
 )
 
 func TransactionGetAll(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +56,41 @@ func TransactionCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var user models.User
+	err := mysql.DB.Debug().First(&user, newTransaction.BuyerID).Error
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := Result{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// 1. Initiate Snap client
+	var s snap.Client
+	s.New("SB-Mid-server-9-9vMu3s_szn7q6pU74APTvH", midtrans.Sandbox)
+	// Use to midtrans.Production if you want Production Environment (accept real transaction).
+
+	// 2. Initiate Snap request param
+	req := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  "ORDER-ID-12345",
+			GrossAmt: int64(newTransaction.Price),
+		},
+		CreditCard: &snap.CreditCardDetails{
+			Secure: true,
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			FName: user.Name,
+			Email: user.Email,
+		},
+	}
+
+	// 3. Execute request create Snap transaction to Midtrans Snap API
+	snapResp, _ := s.CreateTransaction(req)
+	fmt.Println(snapResp)
+
 	w.Header().Set("Content-Type", "application/json")
-	response := Result{Code: http.StatusOK, Message: "success", Data: map[string]interface{}{"product": newTransaction}}
+	response := Result{Code: http.StatusOK, Message: "success", Data: map[string]interface{}{"product": newTransaction, "url": snapResp}}
 	json.NewEncoder(w).Encode(response)
 }
